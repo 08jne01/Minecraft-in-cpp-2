@@ -328,3 +328,9 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/Minecraft-In-Cpp-2/include/stb
+/Minecraft-In-Cpp-2/include/KHR
+/Minecraft-In-Cpp-2/include/glm
+/Minecraft-In-Cpp-2/include/GLFW
+/Minecraft-In-Cpp-2/include/glad
+/Minecraft-In-Cpp-2/libs
