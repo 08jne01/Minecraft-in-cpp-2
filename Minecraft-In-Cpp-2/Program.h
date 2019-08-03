@@ -7,6 +7,7 @@
 #include "EventHandler.h"
 #include "Camera.h"
 #include "Clock.h"
+#include "World.h"
 
 class Program
 

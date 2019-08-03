@@ -6,7 +6,6 @@ ChunkRenderer::ChunkRenderer(unsigned int shaderProgram_, Config config_): textu
 	shaderProgram = shaderProgram_;
 	textureAtlas.readData("Resources/Database/BlocksTextureMap.dat");
 	config = config_;
-	makeBuffers();
 }
 
 ChunkRenderer::~ChunkRenderer()
@@ -15,11 +14,11 @@ ChunkRenderer::~ChunkRenderer()
 	
 }
 
-void ChunkRenderer::buildMesh(const Chunk& chunk)
+void ChunkRenderer::buildMesh(Chunk& chunk)
 
 {
-	vertices.clear();
-	indices.clear();
+	chunk.vertices.clear();
+	chunk.indices.clear();
 	indexIndices = 0;
 
 	for (int i = 0; i < 16; i++)
@@ -42,46 +41,53 @@ void ChunkRenderer::buildMesh(const Chunk& chunk)
 					unsigned char top = chunk.adjacent(TOP, i, j, k);
 					unsigned char bottom = chunk.adjacent(BOTTOM, i, j, k);
 
-					if (back == 0) addVertices(chunk, i, j, k, BACK, indexIndices);
-					if (front == 0) addVertices(chunk, i, j, k, FRONT, indexIndices);
-					if (left == 0) addVertices(chunk, i, j, k, LEFT, indexIndices);
-					if (right == 0) addVertices(chunk, i, j, k, RIGHT, indexIndices);
-					if (top == 0) addVertices(chunk, i, j, k, TOP, indexIndices);
-					if (bottom == 0) addVertices(chunk, i, j, k, BOTTOM, indexIndices);
+					if (block != 5)
 
-					if (back == 5 && block != 5) addVertices(chunk, i, j, k, BACK, indexIndices);
-					if (front == 5 && block != 5) addVertices(chunk, i, j, k, FRONT, indexIndices);
-					if (left == 5 && block != 5) addVertices(chunk, i, j, k, LEFT, indexIndices);
-					if (right == 5 && block != 5) addVertices(chunk, i, j, k, RIGHT, indexIndices);
-					if (top == 5 && block != 5) addVertices(chunk, i, j, k, TOP, indexIndices);
-					if (bottom == 5 && block != 5) addVertices(chunk, i, j, k, BOTTOM, indexIndices);
+					{
+						if (back == 0) addVertices(chunk, i, j, k, BACK, indexIndices);
+						if (front == 0) addVertices(chunk, i, j, k, FRONT, indexIndices);
+						if (left == 0) addVertices(chunk, i, j, k, LEFT, indexIndices);
+						if (right == 0) addVertices(chunk, i, j, k, RIGHT, indexIndices);
+						if (top == 0) addVertices(chunk, i, j, k, TOP, indexIndices);
+						if (bottom == 0) addVertices(chunk, i, j, k, BOTTOM, indexIndices);
+
+						if (back == 5) addVertices(chunk, i, j, k, BACK, indexIndices);
+						if (front == 5) addVertices(chunk, i, j, k, FRONT, indexIndices);
+						if (left == 5) addVertices(chunk, i, j, k, LEFT, indexIndices);
+						if (right == 5) addVertices(chunk, i, j, k, RIGHT, indexIndices);
+						if (top == 5) addVertices(chunk, i, j, k, TOP, indexIndices);
+						if (bottom == 5) addVertices(chunk, i, j, k, BOTTOM, indexIndices);
+					}
+
+					else
+
+					{
+						if (top == 0) addVertices(chunk, i, j, k, TOP, indexIndices);
+					}
 				}
 			}
 		}
 	}
-	updateBuffers(vertices, indices);
 }
 
-void ChunkRenderer::addVertices(const Chunk& chunk, int i, int j, int k, int face, int index)
+void ChunkRenderer::addVertices(Chunk& chunk, int i, int j, int k, int face, int index)
 
 {
-	
-	CubeVertexData cube;
-	std::vector<Vertex> vertexData = cube.verticesFaces[face];
-	std::vector<unsigned int> indexData = cube.indiciesFaces[face];
+	vertexData = cube.verticesFaces[face];
+	indexData = cube.indiciesFaces[face];
 
 	translateCubeMesh(chunk, i, j, k, index, face, vertexData, indexData);
 
 	for (int n = 0; n < vertexData.size(); n++)
 
 	{
-		vertices.push_back(vertexData[n]);
+		chunk.vertices.push_back(vertexData[n]);
 	}
 
 	for (int n = 0; n < indexData.size(); n++)
 
 	{
-		indices.push_back(indexData[n]);
+		chunk.indices.push_back(indexData[n]);
 	}
 	indexIndices += 4;
 }
@@ -109,5 +115,24 @@ void ChunkRenderer::drawChunk(const Chunk& chunk, const Camera& camera)
 
 {
 	setUniforms(chunk.coordinateData, camera);
-	draw(texture, indices.size());
+	draw(chunk.bufferID, texture, chunk.indices.size());
+}
+
+void ChunkRenderer::drawWorld(World& world, const Camera& camera)
+
+{
+	for (std::list<Chunk>::iterator it = world.getChunksRef().begin(); it != world.getChunksRef().end(); it++)
+
+	{
+		if (!it->vertices.size())
+
+		{
+			makeBuffers(it->bufferID);
+			buildMesh(*it);
+		}
+
+		else if (world.updateAdjacentChunks(*it)) buildMesh(*it);
+		updateBuffers(it->bufferID, it->vertices, it->indices);
+		drawChunk(*it, camera);
+	}
 }

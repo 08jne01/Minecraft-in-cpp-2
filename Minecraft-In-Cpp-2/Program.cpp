@@ -71,34 +71,19 @@ int Program::mainLoop()
 	fragmentShader.deleteShader();
 
 	Config config(width, height, 0, 16, 90);
-
+	
+	//world.updateAllChunks();
+	
 	ChunkRenderer chunkRenderer(shaderProgram, config);
-	Chunk chunk1;
-	Chunk chunk2;
-	chunk2.coordinateData.position = glm::vec3(16, 0, 0);
-		
-	for (int i = 0; i < 16; i++)
+	World world;
+	world.genChunk(0, 0);
+	//Chunk chunk1;
 
-	{
-		for (int k = 0; k < 16; k++)
-
-		{
-			chunk1.setBlock(i, 0, k, 1);
-		}
-	}
-
-	for (int i = 0; i < 16; i++)
-
-	{
-		for (int k = 0; k < 16; k++)
-
-		{
-			chunk2.setBlock(i, 0, k, 1);
-		}
-	}
-
-	chunk2.minusX = &chunk1;
-	chunk1.plusX = &chunk2;
+	//world.addChunk(chunk2);
+	//world.genChunk(0, 32);
+	
+	//chunk2.minusX = &chunk1;
+	//chunk1.plusX = &chunk2;
 
 	//chunk.setBlock(0, 1, 0, 1);
 	
@@ -115,13 +100,17 @@ int Program::mainLoop()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//Update
 		camera.update();
-
+		world.getChunksShouldUnload(camera);
+		world.unloadChunks();
+		world.getChunksShouldLoad(camera);
 		//Draw
-		chunkRenderer.buildMesh(chunk1);
-		chunkRenderer.drawChunk(chunk1, camera);
+		chunkRenderer.drawWorld(world, camera);
 
-		chunkRenderer.buildMesh(chunk2);
-		chunkRenderer.drawChunk(chunk2, camera);
+		//chunkRenderer.buildMesh(chunk1);
+		//chunkRenderer.drawChunk(chunk1, camera);
+
+		//chunkRenderer.buildMesh(chunk2);
+		//chunkRenderer.drawChunk(chunk2, camera);
 
 
 		glfwSwapBuffers(window);

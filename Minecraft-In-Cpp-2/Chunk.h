@@ -1,8 +1,10 @@
 #pragma once
 #include "CubeVertexData.h"
 #include "Entity.h"
+#include "BufferID.h"
+#include <glad/glad.h>
 #include <vector>
-#include <amprt.h>
+#include <iostream>
 class Chunk
 
 {
@@ -14,6 +16,111 @@ public:
 	{
 		blocks.resize(16 * 256 * 16);
 		std::fill(blocks.begin(), blocks.end(), 0);
+	}
+
+	Chunk(std::vector<float>& heightMap)
+
+	{
+		blocks.resize(16 * 256 * 16);
+		std::fill(blocks.begin(), blocks.end(), 0);
+
+		/*for (int i = 0; i < 16; i++)
+
+		{
+			for (int k = 0; k < 16; k++)
+
+			{
+				int height = heightMap[i + k * 16];
+				if (height > 0 && height < 256) setBlock(i, height, k, 1);
+			}
+		}*/
+
+		for (int i = 0; i < 16; i++)
+
+		{
+			for (int j = 0; j < 256; j++)
+
+			{
+				for (int k = 0; k < 16; k++)
+
+				{
+
+					int height = heightMap[i + k * 16];
+					
+					if (j < height - 2)
+
+					{
+						setBlock(i, j, k, 3);
+					}
+
+					else if (j < height - 1)
+
+					{
+						setBlock(i, j, k, 2);
+					}
+
+					else if (j < height)
+
+					{
+						setBlock(i, j, k, 1);
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < 16; i++)
+
+		{
+			for (int j = 0; j < 85; j++)
+
+			{
+				for (int k = 0; k < 16; k++)
+
+				{
+					if (getBlock(i, j, k) == 0)
+
+					{
+						setBlock(i, j, k, 5);
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < 16; i++)
+
+		{
+			for (int j = 0; j < 256; j++)
+
+			{
+				for (int k = 0; k < 16; k++)
+
+				{
+					if (getBlock(i, j, k) == 5)
+
+					{
+						//if (adjacent(BACK, i, j, k) == 1) setBlock(i, j, k - 1, 4);
+						//if (adjacent(FRONT, i, j, k) == 1) setBlock(i, j, k + 1, 4);
+						//if (adjacent(LEFT, i, j, k) == 1) setBlock(i - 1, j, k, 4);
+						//if (adjacent(RIGHT, i, j, k) == 1) setBlock(i + 1, j, k, 4);
+						//std::cout << +adjacent(BOTTOM, i, j, k);
+						if (adjacent(BOTTOM, i, j, k) == 1) setBlock(i, j - 1, k, 4);
+					}
+				}
+			}
+		}
+	}
+
+	~Chunk()
+
+	{
+		if (minusX != nullptr) minusX->plusX = nullptr;
+		if (plusX != nullptr) plusX->minusX = nullptr;
+		if (minusZ != nullptr) minusZ->plusZ = nullptr;
+		if (plusZ != nullptr) plusZ->minusZ = nullptr;
+
+		glDeleteBuffers(1, &this->bufferID.VAO);
+		glDeleteBuffers(1, &this->bufferID.VBO);
+		glDeleteBuffers(1, &this->bufferID.EBO);
 	}
 
 	void setBlock(int i, int j, int k, unsigned char type)
@@ -77,7 +184,7 @@ public:
 
 			{
 				if (j - 1 < 0) return 0;
-				return getBlock(i, j + 1, k);
+				return getBlock(i, j - 1, k);
 			}
 		}
 	}
@@ -87,4 +194,10 @@ public:
 	Chunk* plusX = nullptr;
 	Chunk* minusZ = nullptr;
 	Chunk* plusZ = nullptr;
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	BufferID bufferID;
+
+	int shouldLoad = 1;
 };

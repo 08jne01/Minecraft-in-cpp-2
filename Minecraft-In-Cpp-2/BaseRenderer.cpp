@@ -15,17 +15,17 @@ BaseRenderer::BaseRenderer()
 BaseRenderer::~BaseRenderer()
 
 {
-	glDeleteBuffers(1, &this->VAO);
-	glDeleteBuffers(1, &this->VBO);
-	glDeleteBuffers(1, &this->EBO);
+	//glDeleteBuffers(1, &this->VAO);
+	//glDeleteBuffers(1, &this->VBO);
+	//glDeleteBuffers(1, &this->EBO);
 }
 
-void BaseRenderer::makeBuffers()
+void BaseRenderer::makeBuffers(BufferID& buffersID)
 
 {
-	glGenVertexArrays(1, &this->VAO);
-	glGenBuffers(1, &this->VBO);
-	glGenBuffers(1, &this->EBO);
+	glGenVertexArrays(1, &buffersID.VAO);
+	glGenBuffers(1, &buffersID.VBO);
+	glGenBuffers(1, &buffersID.EBO);
 }
 
 void BaseRenderer::setUniforms(const Entity& entity, const Camera& camera)
@@ -50,15 +50,15 @@ void BaseRenderer::setUniforms(const Entity& entity, const Camera& camera)
 	glUniformMatrix4fv(model, 1, GL_FALSE, &modelMat[0][0]);
 }
 
-void BaseRenderer::updateBuffers(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
+void BaseRenderer::updateBuffers(const BufferID& buffer, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 
 {
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
+	glBindVertexArray(buffer.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer.VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -66,12 +66,12 @@ void BaseRenderer::updateBuffers(std::vector<Vertex>& vertices, std::vector<unsi
 	glEnableVertexAttribArray(1);
 }
 
-void BaseRenderer::draw(Texture& texture, unsigned int indicesSize)
+void BaseRenderer::draw(const BufferID& buffer, Texture& texture, unsigned int indicesSize)
 
 {
 	texture.bind();
 	glUseProgram(shaderProgram);
-	glBindVertexArray(VAO);
+	glBindVertexArray(buffer.VAO);
 	glDrawElements(GL_TRIANGLES, indicesSize, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	texture.unbind();

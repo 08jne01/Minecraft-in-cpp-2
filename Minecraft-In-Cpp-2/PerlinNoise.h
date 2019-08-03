@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <iostream>
+#include <assert.h>
 #define PI 3.14159
 
 class PerlinNoise
@@ -11,7 +13,7 @@ public:
 	PerlinNoise(int xSize, int ySize, int seed_, int noise_, double scale);
 	double perlin(double x, double y, double period);
 	double fractalNoise(double x, double y, int layers, double period);
-	double gradient(int value, int min, int max);
+	double gradient(int value, float min, float max);
 
 private:
 	int xS, yS;

@@ -149,5 +149,11 @@
     <ClInclude Include="Config.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferID.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

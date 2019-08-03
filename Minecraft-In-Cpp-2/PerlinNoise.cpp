@@ -36,16 +36,16 @@ double PerlinNoise::dotGridGradient(int intX, int intY, double x, double y)
 double PerlinNoise::perlin(double x, double y, double period)
 
 {
-	double locX = x / period + xS / 2;
-	double locY = y / period + yS / 2;
+	double locX = x / period;
+	double locY = y / period;
 
-	int x0 = int(locX);
+	int x0 = floor(locX);
 	//std::cout << x0 << std::endl;
-	x0 = x0 % (int)period;
+	//x0 = x0 % (int)period;
 	//std::cout << x0 << std::endl;
 	int x1 = x0 + 1;
-	int y0 = int(locY);
-	y0 = y0 % (int)period;
+	int y0 = floor(locY);
+	//y0 = y0 % (int)period;
 	int y1 = y0 + 1;
 
 	double sx = locX - (double)x0;
@@ -77,9 +77,12 @@ double PerlinNoise::fractalNoise(double x, double y, int layers, double period)
 	return val;
 }
 
-double PerlinNoise::gradient(int input, int min, int max)
+double PerlinNoise::gradient(int value, float min, float max)
 
 {
+	assert(min < max);
 	std::hash<int> hash;
-	return hash(input + seed) % (max - min + 1) + min;
+	float frac = (float)hash(value + seed) / (float)std::numeric_limits<std::size_t>::max();
+	float diff = max - min;
+	return diff * frac + min;
 }
